@@ -1,0 +1,31 @@
+SELECT
+  r.repo_name,
+  c.message,
+  c.committer.date,
+  l.language.name
+FROM (
+  SELECT
+    repo_name
+  FROM
+    [bigquery-public-data:github_repos.sample_repos]) r
+JOIN (
+  SELECT
+    repo_name,
+    language.name,
+  FROM
+    [bigquery-public-data:github_repos.languages]
+  WHERE
+    language.name = 'Perl') l   // replace programming language here
+ON
+  r.repo_name = l.repo_name
+JOIN (
+  SELECT
+    repo_name,
+    message,
+    committer.date
+  FROM
+    FLATTEN([bigquery-public-data:github_repos.commits], repo_name) ) c
+ON
+  c.repo_name = l.repo_name
+LIMIT
+  300000;
